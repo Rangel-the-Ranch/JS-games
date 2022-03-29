@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body,
+        canvas {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+    <body  onload="init()">
+	   <canvas id="canvas-id" width="800" height="600">
+            <script> var myX = 475, myY = 50;
+var kukaStartX,kukaStartY
+kukaStartX=myX+25;
+kukaStartY=myY+50;
+var kukaKraiX,kukaKraiY,angle=90/180.0*Math.PI,promqna=1;
+var iztrelqnaLiE=false,goleminaNaKukata=50,debelinaNakukata=2,vru6taSeKukata=3;
+var skorost=3;
+var broiZlato=10,kolkohvanah=0,koezlatohvanah ,otbelqzah=false , hvanahZlato = false;
+var zlatoX=[],zlatoY=[],goleminaZlato=[],pari=0;
+var pechat ,gameover=false;
+var lives = 3;
+var ground = new Image();
+var gold = new Image();
+var mario = new Image();
+var sky = new Image();
+var live = new Image();
+pechat = 'points:  ' + pari;
+
+restartirai();
+function Images(){
+    ground.src = "ground.png";
+    gold.src = "gold.png";
+    mario.src = "mario.png";
+    sky.src = "sky.png";
+    live.src = "lives.png";
+}
+
+function restartirai(){
+    Images();
+    pari=0;
+    for(var i=0;i<broiZlato;i=i+1){
+        zlatoX[i]=Math.random()*900+50;
+        zlatoY[i]=Math.random()*300+200;
+        goleminaZlato[i]=Math.floor(Math.random()*70+60);
+        koezlatohvanah=0;
+    }
+}
+function novLevel(){
+     for(var i=0;i<broiZlato;i=i+1){
+        zlatoX[i]=Math.random()*900+50;
+        zlatoY[i]=Math.random()*500+100;
+        goleminaZlato[i]=Math.floor(Math.random()*70+60);
+        kolkohvanah=0;
+    }
+}
+function update() {
+    if(iztrelqnaLiE==false){
+        NeEIstrelqna()
+    }else{
+        istrelqnaE();
+    }
+    kukaKraiX=Math.cos(angle)*goleminaNaKukata+kukaStartX;
+    kukaKraiY=Math.sin(angle)*goleminaNaKukata+kukaStartY;
+    if(goleminaNaKukata<50){
+        iztrelqnaLiE=false;
+        goleminaNaKukata=50;
+        zlatoX[koezlatohvanah]=NaN;
+        zlatoY[koezlatohvanah]=NaN;
+     
+        vru6taSeKukata=skorost;
+
+        if(kolkohvanah>=broiZlato){
+            novLevel();
+        }
+        pechat = 'points:  ' + pari;
+    }
+    if(lives <= 0){
+
+        gameover=true;
+    }
+   
+};
+function istrelqnaE(){
+    goleminaNaKukata=goleminaNaKukata+vru6taSeKukata;
+    for(var i=0;i<broiZlato;i=i+1){
+        
+            if(areColliding(kukaKraiX,kukaKraiY,debelinaNakukata,debelinaNakukata,zlatoX[i],zlatoY[i],goleminaZlato[i],goleminaZlato[i])){
+                koezlatohvanah=i;
+                
+                zlatoX[i]=kukaKraiX-goleminaZlato[i]/2;
+                zlatoY[i]=kukaKraiY-goleminaZlato[i]/2;
+                hvanah();
+            }
+        
+    }
+    if(kukaKraiX>1000 || kukaKraiX<0 || kukaKraiY>700){
+        vru6taSeKukata=-skorost;
+        koezlatohvanah=-1;
+
+        if ( otbelqzah == false){
+            otbelqzah = true;
+            lives=lives-1;
+        }
+
+    }
+    
+}
+function hvanah(){  
+    vru6taSeKukata=-skorost;
+    zlatoX[i]=kukaKraiX-goleminaZlato[i]/2;
+    zlatoY[i]=kukaKraiY-goleminaZlato[i]/2;
+
+    if(otbelqzah == false){
+        kolkohvanah=kolkohvanah+1;
+        pari=pari+goleminaZlato[koezlatohvanah];
+        otbelqzah = true;
+    }
+    
+}
+function  NeEIstrelqna(){
+    otbelqzah = false;
+    angle=angle+promqna/180.0*Math.PI;
+    if(angle>170/180.0*Math.PI || angle<10/180.0*Math.PI){
+       promqna=-promqna;
+    }
+}
+
+function draw() {
+    context.drawImage(sky, 0,0 ,2000,1000);
+    context.drawImage(ground, 0,100 ,2000,1000);
+    context.font="40px Georgia";
+    context.fillStyle="black";
+    context.fillText(pechat ,0,50);
+    context.fillStyle="red";
+
+    context.drawImage(mario, myX,myY ,50,50);
+    context.fillStyle="black";
+
+    context.fillStyle="green";
+    context.fillRect(0,100,1000,5);
+    context.beginPath();
+    context.moveTo(kukaStartX,kukaStartY);
+    context.arc(kukaStartX,kukaStartY,goleminaNaKukata,angle,angle);
+    context.lineWidth=debelinaNakukata;
+    context.stroke();
+    context.closePath();
+    context.fillStyle="red";
+    context.fillRect(kukaKraiX-debelinaNakukata/2,kukaKraiY-debelinaNakukata/2,debelinaNakukata,debelinaNakukata);
+    context.arc(kukaKraiX,kukaKraiY,2,360,360);
+    context.beginPath();
+    context.arc(kukaKraiX,kukaKraiY,5,0,2*Math.PI);
+    context.fillStyle="grey";
+    context.fill();
+    context.closePath;
+    for(var i=0;i<broiZlato;i=i+1){
+        context.fillStyle="yellow";
+
+        context.drawImage(gold,zlatoX[i],zlatoY[i],goleminaZlato[i],goleminaZlato[i]);
+
+    }
+    if(lives >= 3){
+        context.drawImage(live, 600,30 ,50,50);
+    }
+    if(lives >= 2){
+        context.drawImage(live, 660,30 ,50,50);
+    }
+    if(lives >= 1){
+        context.drawImage(live, 720,30 ,50,50);
+    }
+    if(gameover == true){
+        context.font="100px Georgia";
+        context.fillStyle="yellow";
+        context.fillText("GAME OVER" ,250,500);
+        context.font="50px Georgia";
+        context.fillText("press F5 to restart" ,350,570);
+    }
+};
+
+function keyup(key) {
+
+    if (key == 32){
+        iztrelqnaLiE=true;
+    }
+};
+
+function mouseup() {
+    iztrelqnaLiE=true;
+};</script>
+            <script>
+            if (endlessCanvas == undefined) {
+                var endlessCanvas = false;
+            }
+            var canvas = document.getElementById("canvas-id");
+            if (endlessCanvas) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                window.onresize = function () {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                };
+            }
+            else {
+                canvas.width = 2000;
+                canvas.height = 2000;
+            }
+            var context = canvas.getContext("2d");
+            context.fillStyle = "#0000ff";
+
+            var mouseX = 0;
+            var mouseY = 0;
+
+            var key_left = 37;
+            var key_up = 38;
+            var key_right = 39;
+            var key_down = 40;
+            var key_a = 65;
+            var key_z = 90;
+            var isKeyPressed = [];
+            for (i = 0; i < 256; ++i) {
+                isKeyPressed.push(0);
+            }
+
+            var reqAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame || function (callback) {
+                setTimeout(callback, 1000 / 30);
+            };
+
+            function redraw() {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.globalAlpha = 1;
+
+                context.font = "10px Arial";
+                if (typeof gridSize != "undefined" && gridSize >= 25) {
+                    context.fillText(0, 4, 10);
+                    context.beginPath();
+                    for (i = gridSize; i < canvas.width; i += gridSize) {
+                        context.moveTo(i, 0);
+                        context.lineTo(i, canvas.height);
+                        context.fillText(i, i + 4, 10);
+                    }
+                    for (i = gridSize; i < canvas.height; i += gridSize) {
+                        context.moveTo(0, i);
+                        context.lineTo(canvas.width, i);
+                        context.fillText(i, 4, i + 10);
+                    }
+                    context.stroke();
+                }
+                draw(); 
+                reqAnimationFrame(redraw);
+            };
+
+            function callupdate() {
+                update();
+                setTimeout(callupdate, 10); 
+            };
+
+            function areColliding(Ax, Ay, Awidth, Aheight, Bx, By, Bwidth, Bheight) {
+                if (Bx <= Ax + Awidth) {
+                    if (Ax <= Bx + Bwidth) {
+                        if (By <= Ay + Aheight) {
+                            if (Ay <= By + Bheight) {
+                                return 1;
+                            }
+                        }
+                    }
+                }
+                return 0;
+            };
+
+            function init() {
+                if ('ontouchstart' in window || navigator.maxTouchPoints) {
+                    isMobile = true;
+                    window.addEventListener("touchstart", function (e) {
+                        var touchobj = e.changedTouches[0];
+                        mouseX = parseInt(touchobj.pageX - canvas.offsetLeft);
+                        mouseY = parseInt(touchobj.pageY - canvas.offsetTop);
+                        mousedown();
+                    });
+                    window.addEventListener("touchend", function (e) {
+                        var touchobj = e.changedTouches[0];
+                        mouseX = parseInt(touchobj.pageX - canvas.offsetLeft);
+                        mouseY = parseInt(touchobj.pageY - canvas.offsetTop);
+                        mouseup();
+                    });
+                    window.addEventListener("touchmove", function (e) {
+                        var touchobj = e.changedTouches[0];
+                        mouseX = parseInt(touchobj.pageX - canvas.offsetLeft);
+                        mouseY = parseInt(touchobj.pageY - canvas.offsetTop);
+                    });
+                }
+                window.addEventListener("mousemove", function (e) {
+                    mouseX = e.pageX - canvas.offsetLeft;
+                    mouseY = e.pageY - canvas.offsetTop;
+                });
+                if (typeof mousemove != "undefined") {
+                    window.addEventListener("mousemove", mousemove);
+                }
+                if (typeof mouseup != "undefined") {
+                    window.addEventListener("mouseup", mouseup);
+                }
+                if (typeof mousedown != "undefined") {
+                    window.addEventListener("mousedown", mousedown);
+                }
+                if (typeof keydown != "undefined") {
+                    window.addEventListener("keydown", function (e) {
+                        isKeyPressed[e.keyCode] = 1;
+                        keydown(e.keyCode);
+                    });
+                }
+                else {
+                    window.addEventListener("keydown", function (e) {
+                        isKeyPressed[e.keyCode] = 1;
+                    });
+                }
+                if (typeof keyup != "undefined") {
+                    window.addEventListener("keyup", function (e) {
+                        isKeyPressed[e.keyCode] = 0;
+                        keyup(e.keyCode);
+                    });
+                }
+                else {
+                    window.addEventListener("keyup", function (e) {
+                        isKeyPressed[e.keyCode] = 0;
+                    });
+                }
+                if (typeof draw == "undefined") {
+                    redraw = function () {
+                        context.clearRect(0, 0, canvas.width, canvas.height);
+                        context.globalAlpha = 1;
+                        context.fillStyle = "#FF0000";
+                        context.font = "20px Arial";
+                        context.fillText("Press <F12> for error info!", 40, 40);
+                    };
+                }
+                redraw();
+                callupdate();
+            };
+            </script>
+        </canvas>
+    </body>
+</html>
