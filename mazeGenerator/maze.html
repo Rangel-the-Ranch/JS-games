@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>body {margin:0;}</style>
+	</head>
+	<body onload="init()">
+		<canvas id="canvas-id" width="1000" height="660" />
+		<script>
+
+var canvas = document.getElementById("canvas-id");
+var context = canvas.getContext("2d");
+
+
+var mouseX = 0;
+var mouseY = 0;
+
+
+var key_left	= 37;
+var key_up		= 38;
+var key_right	= 39;
+var key_down	= 40;
+var key_a		= 65;
+var key_z		= 90;
+
+var isKeyPressed=[];
+for(i=0;i<256;++i)
+	isKeyPressed.push(0);
+
+
+
+var reqAnimationFrame =
+	window.requestAnimationFrame ||
+	window.mozRequestAnimationFrame ||
+	window.webkitRequestAnimationFrame ||
+	window.msRequestAnimationFrame ||
+	function(callback) {
+		setTimeout(callback, 1000/30);
+	}
+
+function redraw() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.globalAlpha = 1;
+
+
+	context.fillStyle = "#FF0000";
+	context.font = "10px Arial";
+	if(typeof gridSize != "undefined" && gridSize >= 25) {
+		context.fillText(0, 4, 10);
+		context.beginPath();
+		for(i=gridSize;i<canvas.width;i+=gridSize) {
+			context.moveTo(i, 0);
+			context.lineTo(i, canvas.height);
+			context.fillText(i, i+4, 10);
+		}
+		for(i=gridSize;i<canvas.height;i+=gridSize) {
+			context.moveTo(0, i);
+			context.lineTo(canvas.width, i);
+			context.fillText(i, 4, i+10);
+		}
+		context.stroke();
+	}
+
+	context.fillStyle = "#0000FF";
+
+	draw(); 
+
+	reqAnimationFrame(redraw);
+}
+
+function callupdate() {
+	update();
+	setTimeout(callupdate, 10);
+}
+
+function areColliding(Ax, Ay, Awidth, Aheight, Bx, By, Bwidth, Bheight) {
+	if (Bx <= Ax + Awidth) {
+		if (Ax <= Bx + Bwidth) {
+			if (By <= Ay + Aheight) {
+				if (Ay <= By + Bheight) {
+					return 1;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+function init() {
+	window.addEventListener("mousemove", function(e) {
+
+		mouseX=e.pageX-canvas.offsetLeft;
+		mouseY=e.pageY-canvas.offsetTop;
+	});
+
+	if(typeof mousemove != "undefined")
+		window.addEventListener("mousemove", mousemove);
+	if(typeof mouseup != "undefined")
+		window.addEventListener("mouseup", mouseup);
+
+	if(typeof keydown != "undefined")
+		window.addEventListener("keydown", function(e) {
+			isKeyPressed[e.keyCode]=1;
+			keydown(e.keyCode);
+		});
+	else window.addEventListener("keydown", function(e) {
+		isKeyPressed[e.keyCode]=1;
+	});
+	if(typeof keyup != "undefined")
+		window.addEventListener("keyup", function(e) {
+			isKeyPressed[e.keyCode]=0;
+			keyup(e.keyCode);
+		});
+	else window.addEventListener("keyup", function(e) {
+		isKeyPressed[e.keyCode]=0;
+	});
+
+
+	if(typeof draw == "undefined")
+		redraw = function() {
+			context.clearRect(0, 0, canvas.width, canvas.height);
+			context.globalAlpha = 1;
+			context.fillStyle = "#FF0000";
+			context.font = "30px Arial";
+			context.fillText("You have an error in your draw function or somewhere else!", 40, 40);
+		}
+
+	redraw();
+	callupdate();
+}
+
+		</script>
+		<!-- <script src="game.js"></script>  -->
+		<script> var grid=[];
+			var maxDuljina=25 ,maxShurina=35;
+			for(var i=-10;i<=maxDuljina;i++){
+				grid[i]=[];
+			}
+			for(var i=0;i<maxDuljina;i++){
+				for(var j=0;j<maxShurina;j++){
+					grid[i][j]="red";
+				}
+			}
+			var speed=10;
+			var skorostX=0,skorostY=0;;
+			var chovekX=400,chovekY=300;
+			var cameraX=0,cameraY=0;
+			var kolkoKletkiKletki=0;
+			var neshtaX=[],neshtaY=[];
+			var otKudePochvam=1;
+			var razmerNaKletka=25;
+			var raztoqnieMejduKletki=0.5;
+			var daImaLiVreme=true;
+			var kudeEchovekaX,kudeEchovekaY,poletoE;
+			
+			//
+			const spawnDelay = 5;
+			//
+			
+			function dfs(a,b){
+				grid[a][b]="blue";
+				neshtaX[neshtaX.length]=a;
+				neshtaY[neshtaY.length]=b;
+				kolkoKletkiKletki++;
+				var rand=Math.floor(Math.random()*4);
+				if(rand==0){
+						if(grid[a][b+1]!="blue" ){
+							if(a>=0 && b<maxShurina && b>=0 && a<maxDuljina){
+								if(grid[a][b+2]!="blue" && grid[a+1][b+1]!="blue" && grid[a-1][b+1]!="blue"){
+									dfs(a,b+1);
+								}
+							}
+						}
+						if(grid[a][b-1]!="blue"){
+							if(a>=0 && b<maxShurina+1 && b>=1 && a<maxDuljina){
+								if(grid[a-1][b-1]!="blue" && grid[a+1][b-1]!="blue" && grid[a][b-2]!="blue"){
+									dfs(a,b-1);
+								}
+							}
+						}
+						if(grid[a+1][b]!="blue") {
+							if(a>=0 && b<maxShurina+1 && b>=0 && a<maxDuljina-1){	
+								if(grid[a+2][b]!="blue" && grid[a+1][b+1]!="blue" && grid[a+1][b-1]!="blue"){
+									dfs(a+1,b);
+								}
+							}
+						}
+						if(grid[a-1][b]!="blue"){
+							if(a>=1 && b<maxShurina+1 && b>=0 && a<maxDuljina){		
+								if(grid[a-2][b]!="blue" && grid[a-1][b+1]!="blue" && grid[a-1][b-1]!="blue"){
+									dfs(a-1,b);	
+								}
+							}
+						}
+					}
+				if(rand==1){
+						if(grid[a+1][b]!="blue") {
+							if(a>=0 && b<maxShurina+1 && b>=0 && a<maxDuljina-1){	
+								if(grid[a+2][b]!="blue" && grid[a+1][b+1]!="blue" && grid[a+1][b-1]!="blue"){
+									dfs(a+1,b);
+								}
+							}
+						}
+						if(grid[a-1][b]!="blue"){
+							if(a>=1 && b<maxShurina+1 && b>=0 && a<maxDuljina){		
+								if(grid[a-2][b]!="blue" && grid[a-1][b+1]!="blue" && grid[a-1][b-1]!="blue"){
+									dfs(a-1,b);	
+								}
+							}
+						}
+			
+						if(grid[a][b-1]!="blue"){
+							if(a>=0 && b<maxShurina+1 && b>=1 && a<maxDuljina){
+								if(grid[a-1][b-1]!="blue" && grid[a+1][b-1]!="blue" && grid[a][b-2]!="blue"){
+									dfs(a,b-1);
+								}
+							}
+						}
+						if(grid[a][b+1]!="blue"){
+							if(a>=0 && b<maxShurina && b>=0 && a<maxDuljina){
+								if(grid[a][b+2]!="blue" && grid[a+1][b+1]!="blue" && grid[a-1][b+1]!="blue"){
+									dfs(a,b+1);
+								}
+							}
+						}
+					}
+				if(rand==2){
+						if(grid[a-1][b]!="blue"){
+							if(a>=1 && b<maxShurina+1 && b>=0 && a<maxDuljina){		
+								if(grid[a-2][b]!="blue" && grid[a-1][b+1]!="blue" && grid[a-1][b-1]!="blue"){
+									dfs(a-1,b);	
+								}
+							}
+						}
+						if(grid[a][b+1]!="blue"){
+							if(a>=0 && b<maxShurina && b>=0 && a<maxDuljina){
+								if(grid[a][b+2]!="blue" && grid[a+1][b+1]!="blue" && grid[a-1][b+1]!="blue"){
+									dfs(a,b+1);
+								}
+							}
+						}
+			
+						if(grid[a+1][b]!="blue") {
+							if(a>=0 && b<maxShurina+1 && b>=0 && a<maxDuljina-1){	
+								if(grid[a+2][b]!="blue" && grid[a+1][b+1]!="blue" && grid[a+1][b-1]!="blue"){
+									dfs(a+1,b);
+								}
+							}
+						}
+						if(grid[a][b-1]!="blue"){
+							if(a>=0 && b<maxShurina+1 && b>=1 && a<maxDuljina){
+								if(grid[a-1][b-1]!="blue" && grid[a+1][b-1]!="blue" && grid[a][b-2]!="blue"){
+									dfs(a,b-1);
+								}
+							}
+						}
+					}
+				if(rand==3){
+						if(grid[a][b+1]!="blue"){
+							if(a>=0 && b<maxShurina && b>=0 && a<maxDuljina){
+								if(grid[a][b+2]!="blue" && grid[a+1][b+1]!="blue" && grid[a-1][b+1]!="blue"){
+									dfs(a,b+1);
+								}
+							}
+						}
+						if(grid[a-1][b]!="blue"){
+							if(a>=1 && b<maxShurina+1 && b>=0 && a<maxDuljina){		
+								if(grid[a-2][b]!="blue" && grid[a-1][b+1]!="blue" && grid[a-1][b-1]!="blue"){
+									dfs(a-1,b);	
+								}
+							}
+						}
+						if(grid[a][b-1]!="blue"){
+							if(a>=0 && b<maxShurina+1 && b>=1 && a<maxDuljina){
+								if(grid[a-1][b-1]!="blue" && grid[a+1][b-1]!="blue" && grid[a][b-2]!="blue"){
+									dfs(a,b-1);
+								}
+							}
+						}
+						if(grid[a+1][b]!="blue") {
+							if(a>=0 && b<maxShurina+1 && b>=0 && a<maxDuljina-1){	
+								if(grid[a+2][b]!="blue" && grid[a+1][b+1]!="blue" && grid[a+1][b-1]!="blue"){
+									dfs(a+1,b);
+								}
+							}
+						}
+					}	
+			}
+			dfs(0,0);
+			//console.log(kolkoKletkiKletki);
+			var spawned=[];
+			for(var i=0;i<maxShurina*maxDuljina;i++){
+				spawned[i]=false;
+			}
+			var kolkoKletkiKletkispawn=0;
+			var time=0;
+			function update(){
+				kudeEchovekaX=Math.floor((cameraX+chovekX)/razmerNaKletka);
+				kudeEchovekaY=Math.floor((cameraY+chovekY)/razmerNaKletka);
+				
+				poletoE=grid[kudeEchovekaX][kudeEchovekaY];
+				//console.log(kudeEchovekaX,kudeEchovekaY,poletoE,grid[kudeEchovekaX][kudeEchovekaY]);
+				time=time+1;
+				//console.log(kolkoKletkiKletki);
+				if(time%spawnDelay==0){
+					spawned[kolkoKletkiKletkispawn]=true;
+					kolkoKletkiKletkispawn++;
+				}
+				cameraX=cameraX+skorostX;
+				cameraY=cameraY+skorostY;
+			}
+			function draw(){
+				//context.fillStyle="black";
+				//context.fillRect(-100,-100,10000,10000);
+				for(var i=0;i<neshtaX.length;i++){
+					if(daImaLiVreme==true){
+						if(spawned[i]){
+							context.fillStyle="black";
+							 context.fillRect(neshtaY[i]*(razmerNaKletka+raztoqnieMejduKletki)+otKudePochvam-cameraX
+											  ,neshtaX[i]*(razmerNaKletka+raztoqnieMejduKletki)+otKudePochvam-cameraY
+											  ,razmerNaKletka
+											  ,razmerNaKletka);
+					  }
+					}else{
+						context.fillStyle="black";
+						context.fillRect(neshtaY[i]*(razmerNaKletka+raztoqnieMejduKletki)+otKudePochvam-cameraX
+										,neshtaX[i]*(razmerNaKletka+raztoqnieMejduKletki)+otKudePochvam-cameraY
+										,razmerNaKletka
+										,razmerNaKletka);
+					}
+				}
+				//context.fillStyle="red";
+				//context.fillRect(chovekX,chovekY,razmerNaKletka/10,razmerNaKletka/10);
+			}
+			function keydown(key){
+				if(key==38 || key==87){
+					skorostY=-speed;
+					for(var x=0;x<maxDuljina;x=x+1){
+						for(var y=0;y<maxShurina;y=y+1){
+							if(poletoE=='blue'){
+								skorostY=-speed;
+							}
+						}
+					}
+				}
+				if(key==40 || key==83){
+					skorostY=speed;
+				}
+				if(key==37 || key==65){
+					skorostX=-speed;
+				}
+				if(key==39 || key==68){
+					skorostX=speed;
+				}
+			}
+			function keyup(key){
+				if(key==38 || key==87){
+					skorostY=0;
+				}
+				if(key==40 || key==83){
+					skorostY=0;
+				}
+				if(key==37 || key==65){
+					skorostX=0;
+				}
+				if(key==39 || key==68){
+					skorostX=0;
+				}
+				
+			}</script>
+	</body>
+</html>
